@@ -1,0 +1,34 @@
+services:
+  db:
+    container_name: rjapi-db
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    container_name: rjapi-server
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_USER=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+      - DB_SSL=${DB_SSL}
+    depends_on:
+      db:
+        condition: service_started
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
