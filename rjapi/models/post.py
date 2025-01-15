@@ -18,3 +18,8 @@ class CommentIn(BaseModel):
 # what the response is back to the user
 class Comment(CommentIn):
     id: int
+
+
+class UserPostWithcomments(BaseModel):
+    post: UserPost
+    comments: list[Comment]

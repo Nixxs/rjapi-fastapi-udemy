@@ -1,6 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
-from rjapi.models.post import Comment, CommentIn, UserPost, UserPostIn
+from rjapi.models.post import (
+    Comment,
+    CommentIn,
+    UserPost,
+    UserPostIn,
+    UserPostWithcomments,
+)
 
 router = APIRouter()
 
@@ -9,7 +15,16 @@ post_table = {}
 comment_table = {}
 
 
-@router.post("/post", response_model=UserPost)
+def find_post(post_id: int):
+    for post in list(post_table.values()):
+        if post["id"] == post_id:
+            return post
+        else:
+            pass
+    return None
+
+
+@router.post("/post", response_model=UserPost, status_code=201)
 async def create_post(post: UserPostIn):
     data = post.model_dump()
 
@@ -26,8 +41,12 @@ async def get_posts():
     return list(post_table.values())
 
 
-@router.post("/comment", response_model=Comment)
+@router.post("/comment", response_model=Comment, status_code=201)
 async def create_comment(comment: CommentIn):
+    post = find_post(comment.post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="post not found")
+
     data = comment.model_dump()
 
     last_record_id = len(comment_table)
@@ -38,6 +57,20 @@ async def create_comment(comment: CommentIn):
     return new_comment
 
 
-@router.get("/comment", response_model=list[Comment])
-async def get_comments():
-    return list(comment_table.values())
+@router.get("/post/{post_id}/comment", response_model=list[Comment])
+async def get_comments_on_post(post_id: int):
+    return [
+        comment for comment in comment_table.values() if comment["post_id"] == post_id
+    ]
+
+
+@router.get("/post/{post_id}", response_model=UserPostWithcomments)
+async def get_post_with_comments(post_id: int):
+    post = find_post(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="post not found")
+
+    return {
+        "post": post,
+        "comments": await get_comments_on_post(post_id),
+    }
