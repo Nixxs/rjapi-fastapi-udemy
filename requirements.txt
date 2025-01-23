@@ -3,3 +3,4 @@ uvicorn[standard]
 gunicorn
 python-dotenv
 pydantic_settings
+databases[aiosqlite]
