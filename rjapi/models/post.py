@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class UserPostIn(BaseModel):
@@ -7,6 +7,7 @@ class UserPostIn(BaseModel):
 
 class UserPost(UserPostIn):
     id: int
+    ConfigDict(from_attributes=True)
 
 
 # what the user provides in the payload
@@ -18,6 +19,7 @@ class CommentIn(BaseModel):
 # what the response is back to the user
 class Comment(CommentIn):
     id: int
+    ConfigDict(from_attributes=True)
 
 
 class UserPostWithcomments(BaseModel):

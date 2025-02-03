@@ -1,11 +1,14 @@
+import os
+
+os.environ["ENV_STATE"] = "test"
 from typing import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
+from rjapi.database import database
 from rjapi.main import app
-from rjapi.routers.post import comment_table, post_table
 
 
 # only run once for all tests
@@ -23,9 +26,9 @@ def client() -> Generator:
 # provides the database for our tests to use anc cleans it before each test
 @pytest.fixture(autouse=True)
 async def db() -> AsyncGenerator:
-    post_table.clear()
-    comment_table.clear()
+    await database.connect()
     yield
+    await database.disconnect()
 
 
 # allows tests to use the async client
