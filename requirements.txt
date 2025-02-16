@@ -4,3 +4,4 @@ gunicorn
 python-dotenv
 pydantic_settings
 databases[aiosqlite]
+rich
