@@ -2,6 +2,7 @@ import datetime
 import logging
 
 from fastapi import HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 
@@ -13,6 +14,7 @@ pwd_context = CryptContext(schemes=["bcrypt"])
 
 SECRET_KEY = "123120730192ulskdjfalksdfjo1j2eoijdlk2j3sdfasdfadf"
 ALGORITHM = "HS256"
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials"
