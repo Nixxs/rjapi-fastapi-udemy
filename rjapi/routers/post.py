@@ -1,4 +1,5 @@
 import logging
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -11,7 +12,7 @@ from rjapi.models.post import (
     UserPostWithcomments,
 )
 from rjapi.models.user import User
-from rjapi.security import get_current_user, oauth2_scheme
+from rjapi.security import get_current_user
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -25,10 +26,10 @@ async def find_post(post_id: int):
 
 
 @router.post("/post", response_model=UserPost, status_code=201)
-async def create_post(post: UserPostIn, token: str = Depends(oauth2_scheme)):
+async def create_post(
+    post: UserPostIn, current_user: Annotated[User, Depends(get_current_user)]
+):
     logger.info("create post")
-    # this will handling getting the user using the token to use this route users need a token
-    current_user: User = await get_current_user(token)  # noqa
 
     data = post.model_dump()
     query = post_table.insert().values(data)
@@ -45,9 +46,10 @@ async def get_posts():
 
 
 @router.post("/comment", response_model=Comment, status_code=201)
-async def create_comment(comment: CommentIn, token: str = Depends(oauth2_scheme)):
+async def create_comment(
+    comment: CommentIn, current_user: Annotated[User, Depends(get_current_user)]
+):
     logger.info(f"create comment for post id: {comment.post_id}")
-    current_user: User = await get_current_user(token)  # noqa
 
     post = await find_post(comment.post_id)
     if not post:
